@@ -8,12 +8,12 @@ const postRegister = async (req, res) => {
   const user_exist = await UserModel.findOne({ email })
 
   if (!email || !password) {
-    res.status(404).json({ error: `Please Input email and password!` })
+    res.status(400).json({ error: `Please Input email and password!` })
   } else if (password.length < 8) {
     res.status(400).json({ error: `Password must be atleast 8 characters!` })
   } else if (user_exist) {
     res
-      .status(400)
+      .status(409)
       .json({ error: `${email} already registered, please login in!` })
   } else {
     const hashedPass = await bcrypt.hash(password, 12)
@@ -22,7 +22,7 @@ const postRegister = async (req, res) => {
       password: hashedPass,
     })
     await user.save()
-    res.status(200).json({ message: `Registered!` })
+    res.status(202).json({ message: `Registered!` })
   }
 }
 
@@ -33,12 +33,12 @@ const postLogin = async (req, res) => {
   const user_exist = await UserModel.findOne({ email })
 
   if (!email || !password) {
-    res.status(404).json({ error: `Please Input email and password!` })
+    res.status(400).json({ error: `Please Input email and password!` })
   } else if (password <= 7) {
     res.status(400).json({ error: `Password must be atleast 8 characters!` })
   } else if (!user_exist) {
     res
-      .status(400)
+      .status(409)
       .json({ error: `${email} not registered, please register first` })
   } else {
     const if_match = await bcrypt.compare(password, user_exist.password)
@@ -46,10 +46,10 @@ const postLogin = async (req, res) => {
 
     const access_token = create_token(user_exist)
     res.cookie('access_token', access_token, {
-      maxAge: 120000,
+      maxAge: 120000, // 2mins
       httpOnly: true,
       secure: true,
-    }) // 2mins
+    })
     res.status(200).json({ message: `Logged In!` })
   }
 }

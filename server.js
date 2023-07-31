@@ -1,4 +1,5 @@
 require('dotenv').config()
+
 const express = require('express')
 const PORT = process.env.PORT || 3000
 const cookie_parser = require('cookie-parser')
@@ -14,6 +15,10 @@ const start = () => {
   try {
     require('./config/connect')(process.env.MONGO_URI_COMPASS)
     app.listen(PORT, () => console.log('Server Running!'))
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    })
+  }
 }
 start()
